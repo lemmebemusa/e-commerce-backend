@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const cron = require('node-cron');
 require('dotenv').config();
 
 const { initDatabase } = require('./src/config/database');
@@ -37,6 +38,17 @@ app.use('/api/admin', adminRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Keep-alive cron job - runs every 2 hours to prevent HF Spaces from idling
+cron.schedule('0 */2 * * *', () => {
+  const keepAliveUrl = process.env.KEEP_ALIVE_URL;
+  if (keepAliveUrl) {
+    fetch(`${keepAliveUrl}/api/health`)
+      .then(res => res.json())
+      .then(data => console.log(`[${new Date().toISOString()}] Keep-alive ping sent:`, data.status))
+      .catch(err => console.error(`[${new Date().toISOString()}] Keep-alive ping failed:`, err.message));
+  }
 });
 
 initDatabase().then(() => {
