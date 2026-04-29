@@ -14,7 +14,17 @@ const adminRoutes = require('./src/routes/adminRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// CORS - allow frontend domain injected at runtime
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ['*'];
+
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  credentials: true,
+}));
+
 app.use(express.json());
 
 app.use('/api/products', productRoutes);
