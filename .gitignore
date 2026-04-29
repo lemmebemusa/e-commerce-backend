@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Environment variables (contain secrets)
+.env
+.env.example
+
+# Logs
+npm-debug.log
+server.log
+
+# OS files
+.DS_Store
+
+# Build
+dist
+build
