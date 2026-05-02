@@ -269,6 +269,21 @@ router.patch('/orders/:id/status', authMiddleware, async (req, res) => {
   }
 });
 
+router.delete('/orders/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM order_items WHERE order_id = $1', [id]);
+    const result = await pool.query('DELETE FROM orders WHERE id = $1 RETURNING *', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 router.get('/orders/export/csv', authMiddleware, async (req, res) => {
   try {
     const { phone } = req.query;
