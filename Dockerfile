@@ -1,21 +1,13 @@
-# Pharmacy Backend - Dockerfile for Hugging Face Spaces
-# HF Spaces clones from GitHub automatically, this just runs the app
-
 FROM node:20-alpine
-
-RUN apk add --no-cache python3 make g++
-
+RUN apk add --no-cache python3 make g++ git
 WORKDIR /app
+# Build argument - inject via HF Spaces "Repository secrets" at build time
 
-COPY package*.json ./
+RUN git clone --depth 1 https://github.com/lemmebemusa/e-commerce-backend.git .
 RUN npm ci
-
-COPY . .
-
+# Runtime environment variables
 ENV PORT=7860
-EXPOSE 7860
-
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/api/health || exit 1
-
 CMD ["node", "index.js"]
